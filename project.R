@@ -16,65 +16,48 @@ rm(list=ls())                                                                   
 #####################################  (import data)  #####################################
 ########################################################################################### 
 
+#########################  (Activation of the required package)  ##########################	
 
-#########################  (Activation of the required package)  ##########################
-		
-											#Installation of the package quantmod
-install.packages('quantmod')
-											#Activation of the package quantmod
-library("quantmod")	
+install.packages('quantmod')				#Installation of the package quantmod
+library("quantmod")							#Activation of the package quantmod
 
+install.packages("RQuantLib")				#Installation of the package RQuantLib
+library("RQuantLib")						#Activation of the package RQuantLib
 
-											#Installation of the package RQuantLib
-install.packages("RQuantLib")
-											#Activation of the package RQuantLib
-library("RQuantLib")	
+install.packages("qmao")					#Installation of the package quantmod add-on
+library("qmao")								#Activation of the package quantmod	add-on
 
-											#Installation of the package quantmod add-on
-install.packages("qmao")
-											#Activation of the package quantmod	add-on
-library("qmao")
 
 
 ######################  (Importation of the name of the companies)  #######################
 
+# Url for downloading company name of the nasdaq
+## File companylist.csv
+http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nasdaq&render=download	
 
-http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nasdaq&render=download	#Url for downloading company name of the nasdaq
-				##File companylist.csv
-
-http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nyse&render=download   #Url for downloading company name of the NYSE
-				##File companylistNYSE.csv
-
-
+# Url for downloading company name of the NYSE
+## File companylistNYSE.csv
+http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nyse&render=download
 
 CompanyNasd <- read.csv(file="FinancialDataAnalysis/companylist.csv",head=TRUE,sep=",")		##Data.frame of the name of the company in the nasdaq
 CompanyNyse <- read.csv(file="FinancialDataAnalysis/companylistNYSE.csv",head=TRUE,sep=",") ##Data.frame of the name of the company in the Nyse
 
-
 drops <- c("ADR.TSO","IPOyear","Summary.Quote","X")					     							  #Names of the columns I want to get rid of 
 CompanyNasd.filtered <- CompanyNasd[CompanyNasd$MarketCap>1000000000 & CompanyNasd$Sector != "n/a",!(names(CompanyNasd) %in% drops)]   #Dropping of the columns useless and the company without corresponding sector
-
 CompanyNyse.filtered <- CompanyNyse[CompanyNyse$MarketCap>1000000000 & CompanyNyse$Sector != "n/a",!(names(CompanyNyse) %in% drops)]   #Dropping of the columns useless and the company without corresponding sector
-
-
-
 
 
 
 ########################  (Getting the data of a given company)  ##########################
 
-#example for Goldman Sachs
+# Example for Goldman Sachs
 getSymbols("GS")				# Getting the data
-
 periodicity(GS)
-
 to.monthly(GS)					# Monthly Xts file
-
 GS.filtered <- to.monthly(GS)	
-
-Ret.GS.month <- last(monthlyReturn(GS), '-1 weeks')	#Monthly return (Not the last week to have the same date as the period available for the risk-free asset)
-
-Ret.GS.monthF <- as.vector(Ret.GS.month$monthly.returns) 		#As a vector. 
+# Monthly return (Not the last week to have the same date as the period available for the risk-free asset)
+Ret.GS.month <- last(monthlyReturn(GS), '-1 weeks')	
+Ret.GS.monthF <- as.vector(Ret.GS.month$monthly.returns) 		# As a vector. 
 
 
 
@@ -91,14 +74,15 @@ symbols <- function(i) {
   return(vector)
 }
 
+# Grab specified quantity of j NYSE stock symbols
 SymbolList <- symbols(40)
 
-
+## Grab the timeseries data of j specified stocks
  for (j in 1:length(SymbolList)) {
-    getSymbols(SymbolList[j])		## Grab the timeseries data of j specified stocks	
+    getSymbols(SymbolList[j])			
 }
 
-# Return yearly return of specifid input stocks, adjust to remain `xtc` 
+# Return yearly return of specific input stocks, adjust to remain `xtc` 
 # class for handling of data with quantmod
 periodreturn <- function(i, time) {
   
@@ -126,22 +110,22 @@ mydata3 <- t(mydata3)
 mydata4 <- t(mydata4)
 mydata5 <- t(mydata5)
 
-
+# inherit rownames from stock symbols from SymbolList data frame
 rownames(mydata1) <- SymbolList
 rownames(mydata2) <- SymbolList
 rownames(mydata3) <- SymbolList
 rownames(mydata4) <- SymbolList
 rownames(mydata5) <- SymbolList
 
-
+# omit any stocks that don't have historical data from '07 - present
 mydata1 <- na.omit(mydata1)
 mydata2 <- na.omit(mydata2)
 mydata3 <- na.omit(mydata3)
 mydata4 <- na.omit(mydata4)
 mydata5 <- na.omit(mydata5)
 
-
-symbolfinal1 <- rownames(mydata1) #return the final list of the stock after having getting ride of the missing value
+# list of remaining stock symbols in dataset after omitting missing
+symbolfinal1 <- rownames(mydata1)
 symbolfinal2 <- rownames(mydata2)
 symbolfinal3 <- rownames(mydata3)
 symbolfinal4 <- rownames(mydata4)
@@ -278,33 +262,37 @@ clusterA = fit1$cluster))
 
 
 
-#Lumping Error - Splitting error  - total error - total error rate
+# Lumping Error - Splitting error  - total error - total error rate
 
 count.clustering.errors <- function(true.classes,inferred.clusters) {
-# Should double-check that the two input vectors have the same length!
-n = length(true.classes)
-# Always a good idea to explicitly declare counters
-lumping.error = 0
-splitting.error = 0
-for (i in 1:(n-1)) {
-for (j in (i+1):n) {
-if ((true.classes[i] != true.classes[j]) # Different classes
-& (inferred.clusters[i] == inferred.clusters[j])) { # Same cluster
-lumping.error = lumping.error + 1
-}
-if ((true.classes[i] == true.classes[j]) # Same classes
-& (inferred.clusters[i] != inferred.clusters[j])) { #Different Cluster
-splitting.error = splitting.error +1
-}
-} # Close for j
-} # Close for i
-total.errors = lumping.error + splitting.error
-n.distinct.pairs = n*(n-1)/2
-total.error.rate = total.errors/n.distinct.pairs
-return(list(lumping.error = lumping.error,
-splitting.error = splitting.error,
-total.errors = total.errors,
-total.error.rate = total.error.rate))
+	# Should double-check that the two input vectors have the same length!
+	n = length(true.classes)
+
+	# Always a good idea to explicitly declare counters
+	lumping.error = 0
+	splitting.error = 0
+
+	for (i in 1:(n-1)) {
+		for (j in (i+1):n) {
+			if ((true.classes[i] != true.classes[j]) # Different classes
+			& (inferred.clusters[i] == inferred.clusters[j])) { # Same cluster
+				lumping.error = lumping.error + 1
+			}
+			if ((true.classes[i] == true.classes[j]) # Same classes
+			& (inferred.clusters[i] != inferred.clusters[j])) { #Different Cluster
+				splitting.error = splitting.error +1
+			}
+		} # Close for j
+	} # Close for i
+	
+	total.errors = lumping.error + splitting.error
+	n.distinct.pairs = n*(n-1)/2
+	total.error.rate = total.errors/n.distinct.pairs
+	
+	return(list(lumping.error = lumping.error,
+				splitting.error = splitting.error,
+				total.errors = total.errors,
+				total.error.rate = total.error.rate))
 }
 
 
@@ -338,10 +326,6 @@ plot (Fit4b$pamobject)
 
 
 
-
-
-
-
 ###### DBSCAN clustering
 
 dbscan(mydata1, 10, showplot=TRUE)
@@ -349,19 +333,11 @@ dbscan(mydata1, 10, showplot=TRUE)
 
 
 
-
-
-
-
-
 ###############################  (Computation of the beta)  ###############################
-
-
 ##################################  (For a given stock)  ##################################
 
-#Data of the Treasury Bond rate for the last 20 year. 
-#http://research.stlouisfed.org/fred2/series/GS20/)	
-
+# Data of the Treasury Bond rate for the last 20 year. 
+# http://research.stlouisfed.org/fred2/series/GS20/)	
 TreasuryBond <- read.csv(file="FinancialDataAnalysis/GS20-monthlyF.csv",head=TRUE,sep=",")	#importation of the csv file downloaded on http://research.stlouisfed.org/fred2/series/GS20/)
 					#monthly rate
 
@@ -370,16 +346,12 @@ Rfree <- as.vector(TreasuryBond$VALUE)
 SPret <- read.csv(file="FinancialDataAnalysis/S&Preturn.csv",head=TRUE,sep=",")	#importation of the csv file downloaded on http://research.stlouisfed.org/fred2/series/GS20/)
 					#daily rate
 
-
 SPretm <- read.csv(file="FinancialDataAnalysis/S&Preturnm.csv",head=TRUE,sep=",")	#importation of the csv file downloaded on http://research.stlouisfed.org/fred2/series/GS20/)
 					#monthly rate
 
 SPretm.filtered <- as.vector(SPretm)			#Create a vector with only the value of the S&P500 at closure, market return.  
 
-
-
-
-Ret.GS.month <- monthlyReturn(GS)													#Monthly return
+Ret.GS.month <- monthlyReturn(GS)				#Monthly return
 
 
 date <- as.Date(TreasuryBond$DATE)				#Only the date important in the data set. 
@@ -389,12 +361,12 @@ date.filtered <- date[date > "2006-12-31"]		#
 
 date <- as.Date(SPretm$Date)
 
-
 RP <- vector("numeric", 76)			#vector of the risk premium returns. 
 
-for(i in 1:76){
-		RP[i] <- SPretm.filtered[i] - Rfree[i]	
+for (i in 1:76){
+	RP[i] <- SPretm.filtered[i] - Rfree[i]	
 }
+
 RP <- t(RP)
 RP <- t(RP)								# Risk-Premium
 
@@ -403,25 +375,20 @@ RP <- t(RP)								# Risk-Premium
 
 beta.lm = lm(Ret.GS.monthF ~ RP, data=faithful)
 
-
 coef(beta.lm)["RP"]
 
+
 ############# BETA function one stock.
-
 BETAs <- function (symbol) {
+		a <- length(symbol)
+		riskprem<- RP
 
-				a <- length(symbol)
+		Ret.month <- last(monthlyReturn(symbol), '-2 weeks')	#Monthly return (Not the last two week to have the same date as the period available for the risk-free asset)
+		Ret.monthF <- as.vector(Ret.month$monthly.returns) 		#As a vector. 
 
-				riskprem<- RP
-
-				Ret.month <- last(monthlyReturn(symbol), '-2 weeks')	#Monthly return (Not the last two week to have the same date as the period available for the risk-free asset)
-
-				Ret.monthF <- as.vector(Ret.month$monthly.returns) 		#As a vector. 
-
-				a <- lm(Ret.monthF ~ riskprem)	
-				return(coef(a)["riskprem"])
-		}
-
+		a <- lm(Ret.monthF ~ riskprem)	
+		return(coef(a)["riskprem"])
+}
 
 
 #############################  (Function for several Stocks)  #############################
@@ -430,79 +397,44 @@ BETAs <- function (symbol) {
 ##Beta function
 
 BETAm <- function (symbol) {
+	a <- length(symbol)
+	riskprem<- RP
 
-				a <- length(symbol)
-
-				riskprem<- RP
-
-				for (i in 1:a) {
-
-					Ret.month <- last(monthlyReturn(symbol[i]), '-2 weeks')	#Monthly return (Not the last two week to have the same date as the period available for the risk-free asset)
-
-					Ret.monthF <- as.vector(Ret.month$monthly.returns) 		#As a vector. 
-
-					a <- lm(Ret.monthF ~ riskprem)
-					
-					b[i] <- as.numeric(coef(a)["riskprem"])
-
-					}
-
-
-				return(b)
-		}
+	for (i in 1:a) {
+		Ret.month <- last(monthlyReturn(symbol[i]), '-2 weeks')	#Monthly return (Not the last two week to have the same date as the period available for the risk-free asset)
+		Ret.monthF <- as.vector(Ret.month$monthly.returns) 		#As a vector. 
+		a <- lm(Ret.monthF ~ riskprem)			
+		b[i] <- as.numeric(coef(a)["riskprem"])
+	}
+	return(b)
+}
 
 
 
 Market.Cap <- function(symbol) {
-
-			a <- length(symbol)
-
-			for (i in 1:a) {
-  
-  				# ATTENTION: We have to give the symbol with quote ("")
- 				m[i] <- CompanyNasd.filtered[(CompanyNasd.filtered$Symbol == symbol[i]),"MarketCap"]
-
- 			}
-
-  			return(m)
+	a <- length(symbol)
+	for (i in 1:a) {
+			# ATTENTION: We have to give the symbol with quote ("")
+			m[i] <- CompanyNasd.filtered[(CompanyNasd.filtered$Symbol == symbol[i]),"MarketCap"]
+	}
+	return(m)
 }
 
 
 MC.B <- function (symbols) {
-
-			a <- length(symbols)
-
-			A <- matrix (0,a,2)
-
-			A[,1] <- Market.Cap(symbols)
-
-			for (i in 1:a) {
-
-				A[i,2] <- BETAs(as.integer(symbols[i]))
-
-				}
-
-			return(A)
-
-			}
+	a <- length(symbols)
+	A <- matrix (0,a,2)
+	A[,1] <- Market.Cap(symbols)
+	for (i in 1:a) {
+		A[i,2] <- BETAs(as.integer(symbols[i]))
+		}
+	return(A)
+}
 
 
 #################################################################
 #### Match SymbolList to CompanyNasd.filtered and get sector ####
 #################################################################
 
-newvect <- vector()
-
-match.s <- function(dat) {
-  for (i in i:length(dat)) {
-    if (rownames(dat) %in% CompanyNasd.filtered$Symbol) {
-      newvect[i] <- CompanyNasd.filtered$Symbol
-    }
-  }
-}
-
-symbolsector <- vector()
-
-
-symbolfinal1.sector <- CompanyNasd.filtered[match(newvect, CompanyNasd.filtered$Symbol),]$Sector
+symbolfinal1.sector <- CompanyNasd.filtered[match(symbolfinal1, CompanyNasd.filtered$Symbol),]$Sector
 
