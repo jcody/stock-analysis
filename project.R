@@ -91,12 +91,12 @@ symbols <- function(i) {
   return(vector)
 }
 
-SymbolList <- symbols(100)
+SymbolList <- symbols(40)
 
 
- for (j in 1:100) {
-    getSymbols(SymbolList[j])		##It works.		
-  }
+ for (j in 1:length(SymbolList)) {
+    getSymbols(SymbolList[j])		## Grab the timeseries data of j specified stocks	
+}
 
 # Return yearly return of specifid input stocks, adjust to remain `xtc` 
 # class for handling of data with quantmod
@@ -272,7 +272,7 @@ mydata.kclust3 <- fit3$cluster
 mydata.kclust4 <- fit4$cluster
 
 #Analyze the cluster to which each cell  is allocated
-(SymbolList.kmeans1 <- data.frame(type = rownames(symbolList), # True value of classes
+(SymbolList.kmeans1 <- data.frame(type = symbolfinal1.sector, # True value of classes
 clusterA = fit1$cluster))
 
 
@@ -487,5 +487,22 @@ MC.B <- function (symbols) {
 			}
 
 
+#################################################################
+#### Match SymbolList to CompanyNasd.filtered and get sector ####
+#################################################################
 
+newvect <- vector()
+
+match.s <- function(dat) {
+  for (i in i:length(dat)) {
+    if (rownames(dat) %in% CompanyNasd.filtered$Symbol) {
+      newvect[i] <- CompanyNasd.filtered$Symbol
+    }
+  }
+}
+
+symbolsector <- vector()
+
+
+symbolfinal1.sector <- CompanyNasd.filtered[match(newvect, CompanyNasd.filtered$Symbol),]$Sector
 
