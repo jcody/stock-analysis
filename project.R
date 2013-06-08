@@ -17,7 +17,6 @@ library(xts)
 
 
 
-
 ######################  (Importation of the name of the companies)  #######################
 
 # Url for downloading company name of the nasdaq
@@ -216,10 +215,6 @@ plot(h.complete2, cex = 0.5, main="monthly"  ,sub = "Complete-link", xlab = "Cel
 plot(h.complete3, cex = 0.5, main="Quarterly Returns (Complete-Link)",sub = "Complete-link", xlab = "Cells", col="#487AA1", col.main="#2B4C66", col.lab="#7C8071", col.axis="#F38630")
 plot(h.complete4, cex = 0.5, main="daily"    ,sub = "Complete-link", xlab = "Cells", col = "green")
 plot(h.complete5, cex = 0.5, main="weekly"   ,sub = "Complete-link", xlab = "Cells", col = "green")
-
-
-
-
 
 
 
@@ -555,7 +550,6 @@ clusplot(Mydata.Beta.filtered, Kmedoids1$cluster, color=TRUE, shade=TRUE, labels
 
 # C-means
 ###########################################################################################
-library(e1071)
 
 cl <- cmeans(Mydata.Beta.filtered, 3, iter.max = 100, verbose = FALSE,
 									  dist = "euclidean", method = "cmeans", m = 2,
@@ -574,7 +568,9 @@ clusplot(Mydata.Beta.filtered, cl$cluster, color=TRUE, shade=TRUE, labels=2, lin
 mydata1.sector <- CompanyNasd.filtered[match(symbolfinal1, CompanyNasd.filtered$Symbol),]$Sector
 
 
-## Obtain parallel coordinate plot
+# Obtain parallel coordinate plot
+### Sorry - didn't include this one on the final
+### because it wasn't interesting enough!
 #################################################################
 #################################################################
 
