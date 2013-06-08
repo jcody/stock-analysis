@@ -535,15 +535,14 @@ clusplot(Mydata.Beta.filtered, FIT$cluster, color=TRUE, shade=TRUE, labels=2, li
 #### K-medoids
 ###########################################################################################
 Kmedoids <- pam(Mydata.Beta.filtered, 9)
-
 Kmedoids1 <- pam(Mydata.Beta.filtered,4)
 
 
 # Plot the Kmedoids
 plotcluster(Mydata.Beta.filtered, Kmedoids$cluster)
-plotcluster(Mydata.Beta.filtered, Kmedoids1$cluster)
-
 clusplot(Mydata.Beta.filtered, Kmedoids$cluster, color=TRUE, shade=TRUE, labels=2, lines=1)
+
+plotcluster(Mydata.Beta.filtered, Kmedoids1$cluster)
 clusplot(Mydata.Beta.filtered, Kmedoids1$cluster, color=TRUE, shade=TRUE, labels=2, lines=1)
 
 
@@ -573,9 +572,13 @@ mydata1.sector <- CompanyNasd.filtered[match(symbolfinal1, CompanyNasd.filtered$
 ### because it wasn't interesting enough!
 #################################################################
 #################################################################
+# option 1
+matplot(mydata1[,-1], col=1:ncol(mydata1), type="l",  ylim=range(mydata1), axes=FALSE,
+        xlab = head(mydata1), ylab = "Return per year")
+axis(1, 1:nrow(mydata1), as.character(mydata1[,1]))
+axis(2)
+box()
 
+# option 2
 plot.zoo(zoo(t(mydata1), order.by=1:ncol(mydata1)), screens = 1, type='o', col = rainbow(ncol(t(mydata1))), ylab="Data")
-
-lines(mydata1.sector, col=1)
-
 legend('topright', names(mydata1.sector), mydata1.sector, col=1:ncol(mydata1), lty=1, cex=.65)
